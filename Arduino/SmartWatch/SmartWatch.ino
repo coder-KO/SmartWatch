@@ -1,11 +1,9 @@
 #include "Module.h"
-#include "Wire.h"
-#include "OLED.h"
 
 #define BUTTON_INTERRUPT_PIN 2
 #define TIME_INTERRUPT_PIN 3
 
-State state(2);
+State state(2); // Initialize with overlay count
 char *serialInputBuffer;
 
 int count = 0;
@@ -15,6 +13,7 @@ void setup()
   Serial.begin(9600);
   Wire.begin();
   OLED::init();
+  OLED::clearDisplay();
 
   pinMode(BUTTON_INTERRUPT_PIN, INPUT_PULLUP);
   pinMode(TIME_INTERRUPT_PIN, INPUT_PULLUP);
@@ -23,7 +22,14 @@ void setup()
   
   // TODO : Add overlays and set currentApp
   state.overlays[0] = new TimeOverlay(&state, 0, 2);
-  state.overlays[1] = new BatteryOverlay(&state, 0, 114);
+  state.overlays[1] = new BatteryOverlay(&state, 0, 110);
+
+  state.updateTime();
+
+  for (uint8_t i = 0; i < state.overlayCount; i++)
+  {
+    state.overlays[i]->updateDisplay();
+  }
 
 }
 
@@ -44,7 +50,7 @@ void loop()
   {
       state.overlays[i]->onIteration();
   }
-  state.currentApp->onIteration();
+//  state.currentApp->onIteration();
 }
 
 /**
@@ -64,10 +70,12 @@ void onButtonInterrupt()
 */
 void onTimeInterrupt()
 {
+  state.updateTime();
   for (uint8_t i = 0; i < state.overlayCount; i++)
   {
     state.overlays[i]->onTimeInterrupt();
   }
+  
   state.currentApp->onTimeInterrupt();
 }
 

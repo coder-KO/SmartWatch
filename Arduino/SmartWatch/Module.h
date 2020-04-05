@@ -1,4 +1,6 @@
+#include "OLED.h"
 #include <stdint.h>
+
 class Module;
 
 /** 
@@ -11,11 +13,19 @@ public:
     Module **overlays;
     Module *currentApp;
     uint8_t overlayCount;
+
+    // Time variables
+    uint8_t minutes, hour, dayOfWeek, date, month, year;
     
     State(uint8_t oc)
     {
-        this->overlayCount = overlayCount;
+        this->overlayCount = oc;
         overlays = new Module *[overlayCount];
+    }
+
+    // TODO : implement with Time libraries
+    void updateTime() {
+            
     }
 };
 
@@ -36,7 +46,7 @@ public:
         this->startColumn = column;
     }
 
-    // Required to endure that the destructor of base class is called when delete is called on base class pointer,
+    // Required to ensure that the destructor of derived class is called when delete is called on base class pointer,
     // specially in this case where base class in abstract and hence at runtime, you must tell the system that the
     // derived class has a deallocator.
     virtual ~Module() {
@@ -84,7 +94,6 @@ public:
 */
 class TimeOverlay : public Module {
     public:
-    uint8_t batteryLevel; // x/5
     TimeOverlay(State *state, uint8_t row, uint8_t column);
     ~TimeOverlay();
     void onSerialInput(char *inp);
@@ -92,7 +101,6 @@ class TimeOverlay : public Module {
     void onButtonInput(int buttonId);
     void updateDisplay();
     void onIteration();
-    void drawBattery();
 };
 
 /** 
@@ -100,6 +108,8 @@ class TimeOverlay : public Module {
 */
 class BatteryOverlay : public Module {
     public:
+    const uint8_t maxBatteryLevel = 5;
+    uint8_t batteryLevel;
     BatteryOverlay(State *state, uint8_t row, uint8_t column);
     ~BatteryOverlay();
     void onSerialInput(char *inp);
@@ -107,4 +117,5 @@ class BatteryOverlay : public Module {
     void onButtonInput(int buttonId);
     void updateDisplay();
     void onIteration();
+    uint8_t readBatteryLevel();
 };

@@ -126,3 +126,10 @@ static const char font[984] PROGMEM = {
     0,57,5,5,62,0,0,0, // y(121)
     17,19,21,25,17,0,0,0, // z(122)
 };
+
+static const char battery[4] PROGMEM = {
+  0b11111111, // For end of box
+  0b10111101, // For battery level present
+  0b10000001, // For battery level absent
+  0b00011000, // For head of battery (1)
+};
