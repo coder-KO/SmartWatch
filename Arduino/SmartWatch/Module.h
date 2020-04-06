@@ -1,7 +1,11 @@
 #include "OLED.h"
 #include <stdint.h>
 
+// Ids of apps if any
+#define STANDARD_WATCH_APP 1
+
 class Module;
+class State;
 
 /** 
  * Keeps track of the system's state as a whole.
@@ -10,23 +14,28 @@ class Module;
 class State
 {
 public:
-    Module **overlays;
-    Module *currentApp;
-    uint8_t overlayCount;
+    static Module **overlays;
+    static Module *currentApp;
+    static uint8_t overlayCount;
 
     // Time variables
-    uint8_t minutes, hour, dayOfWeek, date, month, year;
+    static uint8_t minutes, hour, dayOfWeek, date, month, year;
     
-    State(uint8_t oc)
-    {
-        this->overlayCount = oc;
-        overlays = new Module *[overlayCount];
-    }
+    /**
+     * Initializes state's memory requirements for apps and overlays
+     */
+    static void init(uint8_t oc, uint8_t currentAppId);
 
-    // TODO : implement with Time libraries
-    void updateTime() {
-            
-    }
+    /**
+     * Reads time into time variables
+     */
+    static void updateTime();
+
+    /**
+     * Returns reference to a newly constructed Module depending on Id passed
+     * @param id Integer specifying id of app from one of those declared
+     */
+    static Module* getAppById(uint8_t id);
 };
 
 /**
@@ -37,11 +46,9 @@ class Module
 {
 public:
     const char *icon;
-    State *state;
     uint8_t startRow, startColumn;
-    Module(State *state, uint8_t row, uint8_t column)
+    Module(uint8_t row, uint8_t column)
     {
-        this->state = state;
         this->startRow = row;
         this->startColumn = column;
     }
@@ -94,7 +101,7 @@ public:
 */
 class TimeOverlay : public Module {
     public:
-    TimeOverlay(State *state, uint8_t row, uint8_t column);
+    TimeOverlay(uint8_t row, uint8_t column);
     ~TimeOverlay();
     void onSerialInput(char *inp);
     void onTimeInterrupt();
@@ -110,7 +117,7 @@ class BatteryOverlay : public Module {
     public:
     const uint8_t maxBatteryLevel = 5;
     uint8_t batteryLevel;
-    BatteryOverlay(State *state, uint8_t row, uint8_t column);
+    BatteryOverlay(uint8_t row, uint8_t column);
     ~BatteryOverlay();
     void onSerialInput(char *inp);
     void onTimeInterrupt();
@@ -118,4 +125,18 @@ class BatteryOverlay : public Module {
     void updateDisplay();
     void onIteration();
     uint8_t readBatteryLevel();
+};
+
+/** 
+ * Shows time as a standard watch
+*/
+class StandardWatch : public Module {
+    public:
+    StandardWatch(uint8_t row, uint8_t column);
+    ~StandardWatch();
+    void onSerialInput(char *inp);
+    void onTimeInterrupt();
+    void onButtonInput(int buttonId);
+    void updateDisplay();
+    void onIteration();
 };

@@ -3,7 +3,6 @@
 #define BUTTON_INTERRUPT_PIN 2
 #define TIME_INTERRUPT_PIN 3
 
-State state(2); // Initialize with overlay count
 char *serialInputBuffer;
 
 int count = 0;
@@ -14,21 +13,20 @@ void setup()
   Wire.begin();
   OLED::init();
   OLED::clearDisplay();
+  
+  State::init( 2, STANDARD_WATCH_APP); // Initialize with 2 overlays, get time once and set the first app to display
+  State::overlays[0] = new TimeOverlay(0, 2);
+  State::overlays[1] = new BatteryOverlay(0, 110);
 
   pinMode(BUTTON_INTERRUPT_PIN, INPUT_PULLUP);
   pinMode(TIME_INTERRUPT_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(BUTTON_INTERRUPT_PIN), onButtonInterrupt, FALLING);
   attachInterrupt(digitalPinToInterrupt(TIME_INTERRUPT_PIN), onButtonInterrupt, FALLING);
   
-  // TODO : Add overlays and set currentApp
-  state.overlays[0] = new TimeOverlay(&state, 0, 2);
-  state.overlays[1] = new BatteryOverlay(&state, 0, 110);
 
-  state.updateTime();
-
-  for (uint8_t i = 0; i < state.overlayCount; i++)
+  for (uint8_t i = 0; i < State::overlayCount; i++)
   {
-    state.overlays[i]->updateDisplay();
+    State::overlays[i]->updateDisplay();
   }
 
 }
@@ -40,17 +38,17 @@ void loop()
       String input = Serial.readString();
       serialInputBuffer = new char[input.length()];
       input.toCharArray(serialInputBuffer, input.length());
-      for (uint8_t i = 0; i < state.overlayCount; i++)
+      for (uint8_t i = 0; i < State::overlayCount; i++)
       {
-          state.overlays[i]->onSerialInput(serialInputBuffer);
+          State::overlays[i]->onSerialInput(serialInputBuffer);
       }
-      state.currentApp->onSerialInput(serialInputBuffer);
+      State::currentApp->onSerialInput(serialInputBuffer);
   }
-  for (uint8_t i = 0; i < state.overlayCount; i++)
+  for (uint8_t i = 0; i < State::overlayCount; i++)
   {
-      state.overlays[i]->onIteration();
+      State::overlays[i]->onIteration();
   }
-//  state.currentApp->onIteration();
+//  State::currentApp->onIteration();
 }
 
 /**
@@ -58,11 +56,11 @@ void loop()
 */
 void onButtonInterrupt()
 {
-  for (uint8_t i = 0; i < state.overlayCount; i++)
+  for (uint8_t i = 0; i < State::overlayCount; i++)
   {
-    state.overlays[i]->onButtonInput(getButtonPressed());
+    State::overlays[i]->onButtonInput(getButtonPressed());
   }
-  state.currentApp->onButtonInput(getButtonPressed());
+  State::currentApp->onButtonInput(getButtonPressed());
 }
 
 /**
@@ -70,13 +68,13 @@ void onButtonInterrupt()
 */
 void onTimeInterrupt()
 {
-  state.updateTime();
-  for (uint8_t i = 0; i < state.overlayCount; i++)
+  State::updateTime();
+  for (uint8_t i = 0; i < State::overlayCount; i++)
   {
-    state.overlays[i]->onTimeInterrupt();
+    State::overlays[i]->onTimeInterrupt();
   }
   
-  state.currentApp->onTimeInterrupt();
+  State::currentApp->onTimeInterrupt();
 }
 
 /**

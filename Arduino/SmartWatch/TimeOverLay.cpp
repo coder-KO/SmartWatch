@@ -5,7 +5,7 @@
  *  Time Overlay
  ################################################################################### */
 
-TimeOverlay::TimeOverlay(State *state, uint8_t row, uint8_t column):Module(state, row, column) {
+TimeOverlay::TimeOverlay(uint8_t row, uint8_t column):Module(row, column) {
 }
 
 TimeOverlay::~TimeOverlay() {

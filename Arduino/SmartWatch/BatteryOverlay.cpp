@@ -5,7 +5,7 @@
  ################################################################################### */
 // Set to occupy row 0, column 114 onwards - implemented to consume 7 columns - 1 start, 1 end, 5 levels
 
-BatteryOverlay::BatteryOverlay(State *state, uint8_t row, uint8_t column):Module(state, row, column) {
+BatteryOverlay::BatteryOverlay(uint8_t row, uint8_t column):Module(row, column) {
   this->batteryLevel = readBatteryLevel(); // read level
 }
 
