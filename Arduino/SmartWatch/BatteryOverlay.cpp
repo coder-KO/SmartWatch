@@ -18,11 +18,6 @@ void BatteryOverlay::onSerialInput(char *inp) {
 }
 
 void BatteryOverlay::onTimeInterrupt() {
-
-}
-
-void BatteryOverlay::onButtonInput(int buttonId) {
-
 }
 
 /**
@@ -73,5 +68,5 @@ void BatteryOverlay::onIteration() {
  * Reads voltage using ADC. Return battery level after consulting Battery's datasheet
  */
 uint8_t BatteryOverlay::readBatteryLevel() {
-  return 1;
+  return 3;
 }

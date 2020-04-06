@@ -1,4 +1,4 @@
-// Must be called at beginning
+#include <Arduino.h>
 #include <Wire.h>
 #include "StandardFont.h"
 

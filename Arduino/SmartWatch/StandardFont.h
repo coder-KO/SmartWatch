@@ -133,3 +133,18 @@ static const char battery[4] PROGMEM = {
   0b10000001, // For battery level absent
   0b00011000, // For head of battery (1)
 };
+
+static const char monthNames[12][3] PROGMEM = {
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec"
+};

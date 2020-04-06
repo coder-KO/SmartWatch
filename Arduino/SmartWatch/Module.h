@@ -1,5 +1,10 @@
+#include <Arduino.h>
 #include "OLED.h"
 #include <stdint.h>
+
+// Pin definitions
+#define BUTTON_INTERRUPT_PIN 3
+#define TIME_INTERRUPT_PIN 2
 
 // Ids of apps if any
 #define STANDARD_WATCH_APP 1
@@ -73,12 +78,6 @@ public:
     */
     virtual void onTimeInterrupt() = 0;
 
-    /**
-     * Called when a button has been pressed by user. You get the button id as the only parameter.
-     * @param buttonId int Id of the button that was pressed.
-    */
-    virtual void onButtonInput(int buttonId) = 0;
-
     /** 
      * Makes changes to the display by actually drawing elements
     */
@@ -105,7 +104,6 @@ class TimeOverlay : public Module {
     ~TimeOverlay();
     void onSerialInput(char *inp);
     void onTimeInterrupt();
-    void onButtonInput(int buttonId);
     void updateDisplay();
     void onIteration();
 };
@@ -121,7 +119,6 @@ class BatteryOverlay : public Module {
     ~BatteryOverlay();
     void onSerialInput(char *inp);
     void onTimeInterrupt();
-    void onButtonInput(int buttonId);
     void updateDisplay();
     void onIteration();
     uint8_t readBatteryLevel();
@@ -136,7 +133,6 @@ class StandardWatch : public Module {
     ~StandardWatch();
     void onSerialInput(char *inp);
     void onTimeInterrupt();
-    void onButtonInput(int buttonId);
     void updateDisplay();
     void onIteration();
 };
