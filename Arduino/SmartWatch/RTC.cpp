@@ -7,7 +7,7 @@ void RTC::writeTo(uint8_t reg, uint8_t value) {
   Wire.write(reg);
   Wire.write(value);
   Wire.endTransmission();
-  delay(10);
+  delay(1);
 }
 
 uint8_t RTC::readFrom(uint8_t reg) {
@@ -15,6 +15,10 @@ uint8_t RTC::readFrom(uint8_t reg) {
   Wire.write(reg);
   Wire.endTransmission();
   Wire.requestFrom(RTC_ADDR, 1);
+  uint8_t result;
+  if (Wire.available() >= 1) {
+    result = Wire.read();
+  }
   return Wire.read();
 }
 
@@ -46,7 +50,7 @@ void RTC::readTime() {
     State::month = Wire.read() & MONTH_MASK;
     State::year = Wire.read();
   }
-  delay(10);
+  delay(1);
 }
 
 void RTC::setTime() {
@@ -60,7 +64,7 @@ void RTC::setTime() {
   Wire.write(State::month);                          // Write month
   Wire.write(State::year);                           // Write year
   Wire.endTransmission();                     // Stop transmission and release the I2C bus
-  delay(10);
+  delay(1);
 }
 
 void RTC::configureMinuteAlarm() {
@@ -72,7 +76,7 @@ void RTC::configureMinuteAlarm() {
   Wire.write(0b10000000);
   Wire.write(0b10000000);
   Wire.endTransmission();
-  delay(10);
+  delay(1);
 
 }
 

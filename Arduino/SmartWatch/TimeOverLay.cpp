@@ -33,7 +33,7 @@ void TimeOverlay::updateDisplay() {
   if ( ((State::hour >> 4) & TIME_FORMAT_MASK) == IS_24_HOUR) {
     displayBuffer[0] = (State::hour >> 4) + NUMBERS_DISPLAY_FONT_OFFSET;
     displayBuffer[1] = (State::hour & LOWER_NIBBLE_EXTRACT) + NUMBERS_DISPLAY_FONT_OFFSET;
-    
+
     displayBuffer[5] = '\0';
   }
 
@@ -50,9 +50,10 @@ void TimeOverlay::updateDisplay() {
     }
   }
 
-  OLED::writeString(displayBuffer, 1, this->startRow, this->startColumn);
+    OLED::writeString(displayBuffer, 1, this->startRow, this->startColumn);
+//  OLED::writeString("00:00", 1, this->startRow, this->startColumn);
   Serial.println(displayBuffer);
-  
+
   delete displayBuffer;
   displayBuffer = NULL;
 }

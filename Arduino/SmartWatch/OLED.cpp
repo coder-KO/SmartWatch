@@ -1,11 +1,11 @@
 #include "OLED.h"
 
 void OLED::init() {
-
+  Wire.begin();
   // Set the I2C to HS mode - 400KHz!
   // TWBR = (CPU_CLK / I2C_CLK) -16 /2
   // TWBR = ((16,000,000 / 400,000) - 16) / 2 = 12
-//  TWBR = 12;
+//  TWBR = 72;
 
   // keywords:
   // SEG = COL = segment = column byte data on a page
@@ -31,12 +31,12 @@ void OLED::init() {
   Wire.write(OLED_CMD_SET_DISPLAY_START_LINE);
 
   // Mirror the x-axis. In case you set it up such that the pins are north.
-  //     Wire.write(0xA0); - //in case pins are south - default
+  // Wire.write(0xA0); - //in case pins are south - default
   Wire.write(OLED_CMD_SET_SEGMENT_REMAP);
 
   // Mirror the y-axis. In case you set it up such that the pins are north.
   Wire.write(0xC0); //- in case pins are south - default
-  //     Wire.write(OLED_CMD_SET_COM_SCAN_MODE);
+  // Wire.write(OLED_CMD_SET_COM_SCAN_MODE);
 
   // Default - alternate COM pin map
   Wire.write(OLED_CMD_SET_COM_PIN_MAP);
@@ -63,13 +63,12 @@ void OLED::init() {
   // Horizonatal addressing mode - same as the KS108 GLCD
   Wire.write(OLED_CMD_SET_MEMORY_ADDR_MODE);
   Wire.write(0x01);
-
   // Turn the Display ON
   Wire.write(OLED_CMD_DISPLAY_ON);
 
   // End the I2C comm with the SSD1306
   Wire.endTransmission();
-
+  delay(1);
   OLED::clearDisplay();
 
 }
@@ -78,11 +77,22 @@ void OLED::writeString(char* str, int scaleFactor, int row, int column) {
   int length = strlen(str), index;
   uint8_t rowMax, columnMax;
   rowMax = row + scaleFactor - 1;
-  columnMax = column + (length * scaleFactor * 8);
-//  rowMax += uint8_t(columnMax / 127);
+  columnMax = column + (length * scaleFactor * 8) + 1;
+
+  uint8_t colBuf = columnMax;
+
+  while (colBuf > 110) {
+    rowMax += 1;
+    colBuf -= 110;
+  }
+
+  if (columnMax > 110) {
+    columnMax = 110;
+  }
+
+  OLED::clearDisplayAt(row, column, columnMax);
 
   setCursor(row, rowMax, column, columnMax);
-
   uint8_t currentByte;
   uint8_t* scaledBytes;
   for (int i = 0; i < length; i++) {
@@ -101,9 +111,11 @@ void OLED::writeString(char* str, int scaleFactor, int row, int column) {
         }
       }
       Wire.endTransmission();
-      delay(10);
+      delay(1);
     }
   }
+  delete scaledBytes;
+  scaledBytes = NULL;
 }
 
 void OLED::writeDisplayByte(uint8_t* str, int scaleFactor, int row, int column) {
@@ -123,7 +135,7 @@ void OLED::writeDisplayByte(uint8_t* str, int scaleFactor, int row, int column) 
       }
     }
     Wire.endTransmission();
-    delay(10);
+    delay(1);
   }
 }
 
@@ -140,7 +152,7 @@ void OLED::clearDisplay() {
   Wire.write(0x00);
   Wire.write(0x07);
   Wire.endTransmission();
-  delay(10);
+  delay(1);
   for (uint8_t x = 0; x < 64; x++)
   {
     Wire.beginTransmission(OLED_I2C_ADDRESS);
@@ -150,7 +162,7 @@ void OLED::clearDisplay() {
       Wire.write(0);
     }
     Wire.endTransmission();
-    delay(10);
+    delay(1);
   }
 }
 
@@ -176,7 +188,7 @@ void OLED::clearDisplayAt(uint8_t row, uint8_t column, uint8_t count) {
       Wire.write(0);
     }
     Wire.endTransmission();
-    delay(10);
+    delay(1);
   }
 }
 
@@ -186,7 +198,8 @@ void OLED::setCursor(int rowStart, int rowEnd, int columnStart, int columnEnd) {
   // column 0 to 127
   Wire.write(OLED_CMD_SET_COLUMN_RANGE);
   Wire.write(columnStart); // Start column
-  Wire.write(columnEnd);
+//  Wire.write(columnEnd);
+  Wire.write(127);
   // page 0 to 7
   Wire.write(OLED_CMD_SET_PAGE_RANGE);
   // Cause we inverted the x axis
@@ -194,7 +207,7 @@ void OLED::setCursor(int rowStart, int rowEnd, int columnStart, int columnEnd) {
   Wire.write(7 - rowStart); // Start row
 
   Wire.endTransmission();
-  delay(10);
+  delay(1);
 }
 
 uint8_t* OLED::scale(uint8_t inp, int scale) {

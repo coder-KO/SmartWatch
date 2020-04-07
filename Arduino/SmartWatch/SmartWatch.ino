@@ -7,7 +7,9 @@ bool buttonInterrupt, timeInterrupt;
 void setup()
 {
   Serial.begin(9600);
+  TWCR = 0;
   Wire.begin();
+  delay(100);
   OLED::init();
   OLED::clearDisplay();
 
@@ -18,8 +20,10 @@ void setup()
   delay(1000);
   RTC::init();
 
-  pinMode(TIME_INTERRUPT_PIN, INPUT);
-  pinMode(BUTTON_INTERRUPT_PIN, INPUT);
+  pinMode(TIME_INTERRUPT_PIN, INPUT_PULLUP);
+  //  pinMode(BUTTON_INTERRUPT_PIN, INPUT);
+
+  attachInterrupt(digitalPinToInterrupt(TIME_INTERRUPT_PIN), onTimeInterrupt, FALLING);
 
   for (uint8_t i = 0; i < State::overlayCount; i++)
   {
@@ -49,26 +53,25 @@ void loop()
   State::currentApp->onIteration();
 
   // Servicing events
-  if (digitalRead(TIME_INTERRUPT_PIN) == LOW) {
-    
+  if (timeInterrupt) {
     if (1) {
-      
+
       RTC::readTime();
       RTC::resetMinuteAlarm();
-      
+
       for (uint8_t i = 0; i < State::overlayCount; i++)
       {
         State::overlays[i]->onTimeInterrupt();
       }
-      
+
       State::currentApp->onTimeInterrupt();
       Serial.println("Time interrupt");
-      
+
     }
     timeInterrupt = false;
   }
+}
 
-  if (digitalRead(TIME_INTERRUPT_PIN) == LOW) {
-    buttonInterrupt = false;
-  }
+void onTimeInterrupt() {
+  timeInterrupt = true;
 }
